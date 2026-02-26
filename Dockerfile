@@ -24,7 +24,7 @@ COPY . .
 RUN chmod +x startup.sh
 
 # 8. Expose the FastAPI port
-EXPOSE 8000
+EXPOSE 8000 8001
 
 # 9. Run the startup script
 CMD ["./startup.sh"]

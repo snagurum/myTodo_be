@@ -11,7 +11,19 @@ from schemas import UserCreate, UserLogin, User as UserSchema, TodoCreate, TodoU
 from auth import authenticate_user, create_access_token, get_current_user, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
 from redis_client import cache
 
+from prometheus_client import start_http_server
+from prometheus_fastapi_instrumentator import Instrumentator
+
 app = FastAPI(title="MyTodo API", description="Todo List API with authentication and caching")
+Instrumentator().instrument(app).expose(app)
+
+
+# This hook runs even when started via 'uvicorn main:app'
+@app.on_event("startup")
+async def startup_event():
+    print("Starting Prometheus metrics on port 8001...")
+    # addr="0.0.0.0" is critical for Kubernetes access
+    start_http_server(8001, addr="0.0.0.0")
 
 # CORS middleware
 app.add_middleware(
@@ -168,6 +180,13 @@ def delete_todo(
     cache.delete_pattern(f"todos_user_{current_user.id}_*")
     
     return {"message": "Todo deleted successfully"}
+
+
+# Optional: Add a specific health endpoint
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
 
 @app.get("/")
 def root():
