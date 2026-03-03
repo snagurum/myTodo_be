@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / virtualenv files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.egg-info/
+.venv/
+venv/
+env/
+
+# IDE and editor files
+.idea/ # Ignore PyCharm/IntelliJ project files
+.vscode/ # Ignore VS Code workspace/settings files
+.history/
+*.swp
+
+# Build artifacts
+dist/
+build/
+*.egg
+*.whl
+
+# Documentation files
+.sphinx/
+htmlcov/
+
+# Testing and coverage
+.coverage
+.tox/
+
+# OS-specific files
+.DS_Store # macOS specific file
+Thumbs.db # Windows specific file
+
+# Environment variables and sensitive files
+.env
+.flaskenv
+config.json # Or any file containing sensitive data
+
+# Jupyter Notebook files
+.ipynb_checkpoints # Checkpoint files from Jupyter notebooks

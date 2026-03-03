@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import List, Optional
 import uvicorn
+import os
 
 from database import get_db, create_tables, User, Todo
 from schemas import UserCreate, UserLogin, User as UserSchema, TodoCreate, TodoUpdate, Todo as TodoSchema, Token
@@ -16,7 +17,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="MyTodo API", description="Todo List API with authentication and caching")
 Instrumentator().instrument(app).expose(app)
-
+origins_env = os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
+origins = [origin.strip() for origin in origins_env.split(',')]
 
 # This hook runs even when started via 'uvicorn main:app'
 @app.on_event("startup")
@@ -28,10 +30,11 @@ async def startup_event():
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React app URL
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 @app.on_event("startup")
