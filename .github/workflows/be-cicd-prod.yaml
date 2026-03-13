@@ -2,13 +2,18 @@ name: mytodo_be prod
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      TARGET_REGION: ${{ vars.PROD_AWS_REGION || vars.AWS_REGION }}
+      TARGET_ECR_REPOSITORY: ${{ vars.PROD_ECR_REPOSITORY || vars.ECR_REPOSITORY }}
 
     steps:
       - name: Checkout
@@ -17,9 +22,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.PROD_AWS_REGION }}
+          role-to-assume: ${{ vars.PROD_mytodo_cicd_role_arn }}
+          aws-region: ${{ env.TARGET_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -28,7 +32,7 @@ jobs:
       - name: Build, tag, and push image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ vars.PROD_ECR_REPOSITORY }}
+          ECR_REPOSITORY: ${{ env.TARGET_ECR_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           echo "ECR_REGISTRY = $ECR_REGISTRY"
