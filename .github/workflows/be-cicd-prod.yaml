@@ -3,7 +3,6 @@ name: mytodo_be prod
 on:
   workflow_dispatch:
 
-
 permissions:
   id-token: write
   contents: read
@@ -18,6 +17,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Run Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: 'critical'
+          base-ref: ${{ github.event.before }}
+          head-ref: ${{ github.event.after }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
