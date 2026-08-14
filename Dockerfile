@@ -5,26 +5,32 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# 3. Set work directory
+# 3. Create a non-root system user and group early while still root
+RUN groupadd -r appuser && useradd -r -g appuser -s /sbin/nologin appuser
+
+# 4. Set work directory and ensure the non-root user has access to it
 WORKDIR /app
 
-# 4. Install system dependencies (if your mysql driver needs compilation)
+# 5. Install system dependencies (if your mysql driver needs compilation)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# 5. Install Python dependencies
+# 6. Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 6. Copy the project files
-COPY . .
+# 7. Copy the project files and change ownership to the non-root user
+COPY --chown=appuser:appuser . .
 
-# 7. Make the startup script executable
+# 8. Make the startup script executable
 RUN chmod +x startup.sh
 
-# 8. Expose the FastAPI port
+# 9. Switch to the non-root user for all subsequent operations and runtime
+USER appuser
+
+# 10. Expose the FastAPI port
 EXPOSE 8000 8001
 
-# 9. Run the startup script
+# 11. Run the startup script
 CMD ["./startup.sh"]

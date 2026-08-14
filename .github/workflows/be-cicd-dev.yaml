@@ -25,8 +25,8 @@ jobs:
         uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: 'critical'
-          base-ref: ${{ github.event.before }}
-          head-ref: ${{ github.event.after }}
+          base-ref: 'refs/heads/main'
+          head-ref: ${{ github.sha }}
 
       - name: Set up Python environment
         uses: actions/setup-python@v5
